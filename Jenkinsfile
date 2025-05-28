@@ -3,6 +3,12 @@ pipeline {
 
     stages {
         stage('Build') {
+            agent {
+                docker {
+                    image 'node:18-alpine'
+                    reuseNode true
+                }
+            }
             steps {
                 sh '''
                     ls -la
@@ -14,18 +20,27 @@ pipeline {
                 '''
             }
         }
-        
+
         stage('Test') {
+            agent {
+                docker {
+                    image 'node:18-alpine'
+                    reuseNode true
+                }
+            }
+
             steps {
-                echo 'Test stage'
+                sh '''
+                    test -f build/index.html
+                    npm test
+                '''
             }
         }
     }
-    
+
     post {
         always {
-            // Archive JUnit test results if available
-            junit 'test-results/results.xml'
+            junit 'test-results/junit.xml'
         }
     }
 }
